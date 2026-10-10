@@ -5,7 +5,9 @@
 #include <unordered_map>
 #include <map>
 #include <sstream>
+
 #include <fstream>
+#include <cstdio>
 #include <algorithm>
 #include <stdexcept>
 
@@ -134,12 +136,13 @@ private:
         }
 
 
+
 public:
-    explicit Pokedex(const char* _fileName) : fileName(_fileName) {
-        loadFromFile();
+    explicit Pokedex(const char* _fileName) : fileName(_fileName ? _fileName : "") {
+        if (!fileName.empty()) loadFromFile();
     }
     ~Pokedex() {
-        saveToFile();
+        if (!fileName.empty()) saveToFile();
     }
 
     bool pokeAdd(const char* name_c, int id, const char* types_c) {
