@@ -284,5 +284,7 @@ public:
     };
 
     iterator begin() { return iterator(data.begin()); }
+    iterator begin() const { return iterator(const_cast<std::map<int, Pokemon>&>(data).begin()); }
+    iterator end() const { return iterator(const_cast<std::map<int, Pokemon>&>(data).end()); }
     iterator end() { return iterator(data.end()); }
 };
