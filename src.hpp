@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <map>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include <stdexcept>
 
@@ -101,11 +102,45 @@ private:
         return itD->second;
     }
 
+    private:
+        std::string fileName;
+        void loadFromFile() {
+            std::ifstream fin(fileName);
+            if (!fin) return;
+            std::string line;
+            while (std::getline(fin, line)) {
+                if (line.empty()) continue;
+                std::stringstream ss(line);
+                std::string name; int id; std::string typesStr;
+                ss >> name >> id >> typesStr;
+                if (ss.fail()) continue;
+                Pokemon p; std::snprintf(p.name, sizeof(p.name), "%s", name.c_str());
+                p.id = id;
+                p.types = splitTypes(typesStr);
+                data.emplace(id, std::move(p));
+            }
+        }
+        void saveToFile() const {
+            std::ofstream fout(fileName, std::ios::trunc);
+            for (const auto& kv : data) {
+                const auto& p = kv.second;
+                std::ostringstream typesOut;
+                for (size_t i = 0; i < p.types.size(); ++i) {
+                    typesOut << p.types[i];
+                    if (i + 1 < p.types.size()) typesOut << '#';
+                }
+                fout << p.name << ' ' << p.id << ' ' << typesOut.str() << '\n';
+            }
+        }
+
+
 public:
-    explicit Pokedex(const char* /*_fileName*/) {
-        // No persistent storage required for this simplified solution
+    explicit Pokedex(const char* _fileName) : fileName(_fileName) {
+        loadFromFile();
     }
-    ~Pokedex() {}
+    ~Pokedex() {
+        saveToFile();
+    }
 
     bool pokeAdd(const char* name_c, int id, const char* types_c) {
         try {
